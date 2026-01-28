@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +10,7 @@ import {
 import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { SidebarMenuButton } from "./ui/sidebar";
 
 const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
@@ -30,7 +30,7 @@ const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size={"sm"}>
+        <SidebarMenuButton size="sm">
           {theme === "light" ? (
             <Sun
               key="light"
@@ -50,9 +50,10 @@ const ThemeSwitcher = () => {
               className={"text-muted-foreground"}
             />
           )}
-        </Button>
+          Theme
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-content" align="start">
+      <DropdownMenuContent className="w-content" align="end">
         <DropdownMenuRadioGroup
           value={theme}
           onValueChange={(e) => setTheme(e)}

@@ -8,7 +8,13 @@ import {
 } from "./schemas";
 import z from "zod";
 import { revalidatePath } from "next/cache";
-import { createEvent, deleteEvent, updateEvent } from "./service";
+import {
+  createEvent,
+  deleteEvent,
+  listEvents,
+  ListEventsParams,
+  updateEvent,
+} from "./service";
 
 type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string[] };
 
@@ -18,6 +24,24 @@ async function requireUser() {
 
   if (error || !data.user) throw new Error("Not authenticated");
   return { supabase, user: data.user };
+}
+
+export async function listEventsAction(
+  params: ListEventsParams = {},
+): Promise<ActionResult<{ events: Awaited<ReturnType<typeof listEvents>> }>> {
+  try {
+    const { supabase, user } = await requireUser();
+    const events = await listEvents(supabase, user.id, params);
+    return { ok: true, data: { events } };
+  } catch (err) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error
+          ? [err.message]
+          : ["An unknown error occured while fetching events."],
+    };
+  }
 }
 
 export async function createEventAction(

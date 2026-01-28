@@ -1,15 +1,79 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database as DB } from "@/lib/supabase/database.types";
 import {
   CreateEventInput,
   DeleteEventInput,
   UpdateEventInput,
 } from "./schemas";
-import { Database } from "@/lib/supabase/database.types";
 
-type DatabaseClient = SupabaseClient<Database>;
+type SB = SupabaseClient<DB>;
+
+export type ListEventsParams = {
+  search?: string;
+  sportTypeId?: number;
+  limit?: number;
+  offset?: number;
+};
+
+export type Event = Pick<
+  DB["public"]["Tables"]["events"]["Row"],
+  "id" | "name" | "description" | "sport_type_id" | "sport_type_text"
+> &
+  Pick<DB["public"]["Tables"]["event_venues"]["Row"], "name">;
+
+export async function listEvents(
+  supabase: SB,
+  userId: string,
+  params: ListEventsParams = {},
+) {
+  let query = supabase
+    .from("events")
+    .select(
+      `
+        id, 
+        name, 
+        starts_at, 
+        sport_type_id, 
+        sport_type_text, 
+        description, 
+        event_venues ( 
+          id, 
+          name, 
+          address_text, 
+          details 
+        )
+  `,
+    )
+    .eq("created_by", userId)
+    .order("starts_at", { ascending: false });
+
+  const search = params.search?.trim();
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  if (typeof params.sportTypeId === "number") {
+    query = query.eq("sport_type_id", params.sportTypeId);
+  }
+
+  if (typeof params.limit === "number") {
+    query = query.limit(params.limit);
+  }
+
+  if (typeof params.offset === "number" && params.offset > 0) {
+    query = query.range(
+      params.offset,
+      params.offset + (params.limit ?? 50) - 1,
+    );
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
 
 export async function createEvent(
-  supabase: DatabaseClient,
+  supabase: SB,
   userId: string,
   data: CreateEventInput,
 ) {
@@ -48,8 +112,8 @@ export async function createEvent(
 }
 
 export async function updateEvent(
-  supabase: DatabaseClient,
-  _userId: string,
+  supabase: SB,
+  userId: string,
   data: UpdateEventInput,
 ) {
   const { error: eventErr } = await supabase
@@ -61,7 +125,8 @@ export async function updateEvent(
       sport_type_id: data.sportTypeId ?? null,
       sport_type_text: data.sportTypeText,
     })
-    .eq("id", data.id);
+    .eq("id", data.id)
+    .eq("created_by", userId);
 
   if (eventErr) throw new Error(eventErr.message);
 
@@ -89,11 +154,16 @@ export async function updateEvent(
 }
 
 export async function deleteEvent(
-  supabase: DatabaseClient,
-  _userId: string,
+  supabase: SB,
+  userId: string,
   data: DeleteEventInput,
 ) {
-  const { error } = await supabase.from("events").delete().eq("id", data.id);
+  const { error } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", data.id)
+    .eq("created_by", userId);
+
   if (error) throw new Error(error.message);
   return { id: data.id };
 }
