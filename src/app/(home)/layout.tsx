@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { getUserAction } from "@/utils/users/actions";
 
@@ -19,7 +19,7 @@ export default function HomeLayout({
       <Suspense fallback={<AppSidebar user={null} />}>
         <SidebarWithUser />
       </Suspense>
-      <main>{children}</main>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 }

@@ -24,7 +24,7 @@ export function AppSidebar({ user }: { user: User | null }) {
     : { name: "Guest", email: "" };
 
   return (
-    <Sidebar variant="floating">
+    <Sidebar variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
