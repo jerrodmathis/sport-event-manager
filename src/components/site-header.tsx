@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { CreateEventDrawer } from "./create-event-drawer";
 import { SportType } from "@/utils/sport-types";
+import { EventFilters } from "./event-filters";
 
 export function SiteHeader({ sportTypes }: { sportTypes: SportType[] }) {
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
@@ -18,10 +19,15 @@ export function SiteHeader({ sportTypes }: { sportTypes: SportType[] }) {
           <SidebarTrigger className="-ml-1" />
           <Separator
             orientation="vertical"
-            className="mx-2 data-[orientation=vertical]:h-4"
+            className="mx-2 data-[orientation=vertical]:h-6"
           />
           <h1 className="text-base font-medium">Events</h1>
           <div className="ml-auto flex items-center gap-2">
+            <EventFilters sportTypes={sportTypes} />
+            <Separator
+              orientation="vertical"
+              className="mx-2 data-[orientation=vertical]:h-6"
+            />
             <Button
               variant="default"
               size="sm"

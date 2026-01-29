@@ -47,19 +47,8 @@ export async function listEvents(
     query = query.ilike("name", `%${search}%`);
   }
 
-  if (typeof params.sportTypeId === "number") {
+  if (params.sportTypeId) {
     query = query.eq("sport_type_id", params.sportTypeId);
-  }
-
-  if (typeof params.limit === "number") {
-    query = query.limit(params.limit);
-  }
-
-  if (typeof params.offset === "number" && params.offset > 0) {
-    query = query.range(
-      params.offset,
-      params.offset + (params.limit ?? 50) - 1,
-    );
   }
 
   const { data, error } = await query;

@@ -5,24 +5,48 @@ import { EventCard } from "./event-card";
 import { EventCardSkeleton } from "./event-card-skeleton";
 import { getSportTypes, SportType } from "@/utils/sport-types";
 
-export async function EventList() {
+export async function EventList({
+  searchParams,
+}: {
+  searchParams: { search?: string; sportType?: string };
+}) {
   const sportTypes = await getSportTypes();
 
   return (
     <>
       <SiteHeader sportTypes={sportTypes} />
-      <Suspense fallback={<EventListSkeleton />}>
-        <EventListContent sportTypes={sportTypes} />
-      </Suspense>
+      <div className="flex flex-col gap-4 p-4">
+        <Suspense fallback={<EventListSkeleton />}>
+          <EventListContent
+            sportTypes={sportTypes}
+            searchParams={searchParams}
+          />
+        </Suspense>
+      </div>
     </>
   );
 }
 
-async function EventListContent({ sportTypes }: { sportTypes: SportType[] }) {
-  const res = await listEventsAction();
+async function EventListContent({
+  sportTypes,
+  searchParams,
+}: {
+  sportTypes: SportType[];
+  searchParams: { search?: string; sportType?: string };
+}) {
+  const sportTypeId = searchParams?.sportType
+    ? sportTypes.find((st) => st.name === searchParams.sportType)?.id
+    : undefined;
+
+  const res = await listEventsAction({
+    search: searchParams?.search,
+    sportTypeId,
+  });
+
+  const hasFilters = !!searchParams?.search || !!searchParams?.sportType;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
+    <div className="flex flex-1 flex-col gap-4">
       {res.ok ? (
         res.data.events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -34,10 +58,12 @@ async function EventListContent({ sportTypes }: { sportTypes: SportType[] }) {
           <div className="flex flex-1 items-center justify-center">
             <div className="flex flex-col items-center gap-2 text-center">
               <h3 className="text-2xl font-bold tracking-tight">
-                No events yet
+                {hasFilters ? "No events found" : "No events yet"}
               </h3>
               <p className="text-sm text-muted-foreground">
-                Get started by creating your first event
+                {hasFilters
+                  ? "Try adjusting your search or filters"
+                  : "Get started by creating your first event"}
               </p>
             </div>
           </div>
@@ -55,7 +81,7 @@ async function EventListContent({ sportTypes }: { sportTypes: SportType[] }) {
 
 function EventListSkeleton() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
+    <div className="flex flex-1 flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <EventCardSkeleton key={i} />
