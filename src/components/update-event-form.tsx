@@ -1,4 +1,4 @@
-import { CreateEventInput } from "@/utils/events/schemas";
+import { UpdateEventInput } from "@/utils/events/schemas";
 import { X } from "lucide-react";
 import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { Button } from "./ui/button";
@@ -24,11 +24,11 @@ import {
 import { SportType } from "@/utils/sport-types";
 import { DateTimePicker } from "./ui/datetime-picker";
 
-export function CreateEventForm({
+export function UpdateEventForm({
   form,
   sportTypes,
 }: {
-  form: UseFormReturn<CreateEventInput>;
+  form: UseFormReturn<UpdateEventInput>;
   sportTypes: SportType[];
 }) {
   const {
@@ -119,7 +119,7 @@ export function CreateEventForm({
                   onValueChange={field.onChange}
                 >
                   <SelectTrigger
-                    id="create-event-form-select-sport-type"
+                    id="update-event-form-select-sport-type"
                     aria-invalid={fieldState.invalid}
                   >
                     <SelectValue placeholder="Select" />

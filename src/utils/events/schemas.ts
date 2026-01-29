@@ -1,14 +1,29 @@
 import { z } from "zod";
 
 export const venueInputSchema = z.object({
-  name: z.string().trim().min(1).max(255),
-  address_text: z.string().trim().min(1).max(500),
-  details: z.string().max(500).optional(),
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: "Must be at least 1 character" })
+    .max(255, { error: "Must be less than 255 characters" }),
+  address_text: z.string().trim().min(1, { error: "Must include an address" }),
+  details: z
+    .string()
+    .max(500, { error: "Must be less than 500 characters" })
+    .optional(),
 });
 
 export const createEventInputSchema = z.object({
-  name: z.string().trim().min(1).max(255),
-  startsAt: z.iso.datetime(),
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: "Must be at least 1 character" })
+    .max(255, { error: "Must be less than 255 characters" }),
+  startsAt: z.iso
+    .datetime({ offset: true })
+    .refine((val) => new Date(val) > new Date(), {
+      error: "Event must occur in the future.",
+    }),
   description: z.string().optional(),
   sportTypeId: z.uuid(),
   venues: z
@@ -19,6 +34,7 @@ export const createEventInputSchema = z.object({
 
 export const updateEventInputSchema = createEventInputSchema.extend({
   id: z.number().int().positive(),
+  startsAt: z.iso.datetime({ offset: true }),
 });
 
 export const deleteEventInputSchema = z.object({

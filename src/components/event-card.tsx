@@ -89,6 +89,7 @@ export function EventCard({
             event={event}
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
+            sportTypes={sportTypes}
           />
         </div>
       </CardHeader>

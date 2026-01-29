@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { CreateEventForm } from "./create-event-form";
+import { UpdateEventForm } from "./update-event-form";
 import {
   Drawer,
   DrawerContent,
@@ -10,30 +10,23 @@ import {
 import { Separator } from "./ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  CreateEventInput,
-  createEventInputSchema,
+  UpdateEventInput,
+  updateEventInputSchema,
 } from "@/utils/events/schemas";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { createEventAction } from "@/utils/events/actions";
+import { updateEventAction } from "@/utils/events/actions";
 import { SportType } from "@/utils/sport-types";
+import { type Event } from "@/utils/events/service";
 
-const getNextFiveMinuteInterval = () => {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const roundedMinutes = Math.ceil(minutes / 5) * 5;
-  now.setMinutes(roundedMinutes);
-  now.setSeconds(0);
-  now.setMilliseconds(0);
-  return now.toISOString();
-};
-
-export function CreateEventDrawer({
+export function UpdateEventDrawer({
+  event,
   open,
   onOpenChange,
   sportTypes,
 }: {
+  event: Event;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sportTypes: SportType[];
@@ -42,29 +35,33 @@ export function CreateEventDrawer({
 
   const form = useForm({
     defaultValues: {
-      name: "",
-      description: "",
-      sportTypeId: sportTypes[0].id,
-      startsAt: getNextFiveMinuteInterval(),
-      venues: [],
+      id: event.id,
+      name: event.name,
+      description: event.description ?? "",
+      sportTypeId: event.sport_type_id,
+      startsAt: event.starts_at,
+      venues: event.event_venues.map((v) => ({
+        name: v.name,
+        address_text: v.address_text,
+        details: v.details ?? "",
+      })),
     },
-    resolver: zodResolver(createEventInputSchema),
+    resolver: zodResolver(updateEventInputSchema),
   });
 
-  const handleCreateEvent = async (data: CreateEventInput) => {
+  const handleUpdateEvent = async (data: UpdateEventInput) => {
     console.log(data);
     try {
-      const response = await createEventAction(data);
+      const response = await updateEventAction(data);
       if (!response.ok) throw new Error(response.error.join(", "));
       onOpenChange(false);
-      toast.success(`${data.name} was created successfully`);
-      form.reset();
+      toast.success(`${data.name} was updated successfully`);
     } catch (err: unknown) {
       console.log(err);
       toast.error(
         err instanceof Error
           ? err.message
-          : "An error occurred creating the event.",
+          : "An error occurred updating the event.",
         {
           description: "Please try again.",
         },
@@ -78,19 +75,15 @@ export function CreateEventDrawer({
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent direction="right">
         <DrawerHeader>
-          <DrawerTitle>Create Event</DrawerTitle>
+          <DrawerTitle>Update Event</DrawerTitle>
         </DrawerHeader>
         <Separator />
         <div className="p-4 overflow-auto">
-          <CreateEventForm form={form} sportTypes={sportTypes} />
+          <UpdateEventForm form={form} sportTypes={sportTypes} />
         </div>
         <DrawerFooter>
-          <Button
-            onClick={form.handleSubmit(handleCreateEvent, (errors) => {
-              console.log("validation errors", errors);
-            })}
-          >
-            {isLoading ? "Creating event..." : "Create event"}
+          <Button onClick={form.handleSubmit(handleUpdateEvent)}>
+            {isLoading ? "Updating event..." : "Update event"}
           </Button>
         </DrawerFooter>
       </DrawerContent>
