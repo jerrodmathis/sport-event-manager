@@ -44,7 +44,7 @@ export async function listEvents(
   `,
     )
     .eq("created_by", userId)
-    .order("starts_at", { ascending: false });
+    .order("starts_at", { ascending: true });
 
   const search = params.search?.trim();
   if (search) {
