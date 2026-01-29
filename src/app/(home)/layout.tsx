@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { getUserAction } from "@/utils/users/actions";
+import { Toaster } from "sonner";
 
 async function SidebarWithUser() {
   const result = await getUserAction();
@@ -19,7 +20,10 @@ export default function HomeLayout({
       <Suspense fallback={<AppSidebar user={null} />}>
         <SidebarWithUser />
       </Suspense>
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        {children}
+        <Toaster />
+      </SidebarInset>
     </SidebarProvider>
   );
 }

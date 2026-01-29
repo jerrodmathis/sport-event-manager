@@ -10,9 +10,11 @@ export const createEventInputSchema = z.object({
   name: z.string().trim().min(1).max(255),
   startsAt: z.iso.datetime(),
   description: z.string().optional(),
-  sportTypeId: z.number().int().positive().nullish(),
-  sportTypeText: z.string().trim().min(1).max(80),
-  venues: z.array(venueInputSchema).min(1),
+  sportTypeId: z.uuid(),
+  venues: z
+    .array(venueInputSchema)
+    .min(1, { error: "Add at least one venue" })
+    .max(5, { error: "You can add up to 5 venues" }),
 });
 
 export const updateEventInputSchema = createEventInputSchema.extend({

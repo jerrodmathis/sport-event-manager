@@ -73,8 +73,7 @@ export type Database = {
           description: string | null
           id: number
           name: string
-          sport_type_id: number | null
-          sport_type_text: string
+          sport_type_id: string
           starts_at: string
           updated_at: string
         }
@@ -84,8 +83,7 @@ export type Database = {
           description?: string | null
           id?: number
           name: string
-          sport_type_id?: number | null
-          sport_type_text: string
+          sport_type_id: string
           starts_at: string
           updated_at?: string
         }
@@ -95,8 +93,7 @@ export type Database = {
           description?: string | null
           id?: number
           name?: string
-          sport_type_id?: number | null
-          sport_type_text?: string
+          sport_type_id?: string
           starts_at?: string
           updated_at?: string
         }
@@ -112,15 +109,15 @@ export type Database = {
       }
       sport_types: {
         Row: {
-          id: number
+          id: string
           name: string
         }
         Insert: {
-          id?: number
+          id?: string
           name: string
         }
         Update: {
-          id?: number
+          id?: string
           name?: string
         }
         Relationships: []

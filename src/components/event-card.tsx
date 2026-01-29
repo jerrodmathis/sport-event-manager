@@ -16,26 +16,20 @@ import {
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { deleteEventAction } from "@/utils/events/actions";
 import { Badge } from "./ui/badge";
+import { toast } from "sonner";
+import { UpdateEventDrawer } from "./update-event-drawer";
+import { Event } from "@/utils/events/service";
+import { useState } from "react";
+import { SportType } from "@/utils/sport-types";
 
-type EventCardProps = {
-  event: {
-    id: number;
-    name: string;
-    starts_at: string;
-    description: string | null;
-    sport_type_text: string | null;
-    event_venues:
-      | {
-          id: number;
-          name: string;
-          address_text: string | null;
-          details: string | null;
-        }[]
-      | null;
-  };
-};
-
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({
+  event,
+  sportTypes,
+}: {
+  event: Event;
+  sportTypes: SportType[];
+}) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const venues = event.event_venues ?? [];
   const venue = venues[0];
   const additionalVenueCount = venues.length - 1;
@@ -48,17 +42,14 @@ export function EventCard({ event }: EventCardProps) {
     minute: "numeric",
   });
 
-  const handleUpdate = () => {
-    // TODO: Open update dialog/form
-    console.log("Update event", event.id);
-  };
-
   const handleDelete = async () => {
-    if (confirm(`Delete "${event.name}"?`)) {
-      const result = await deleteEventAction({ id: event.id });
-      if (!result.ok) {
-        alert(result.error.join("\n"));
-      }
+    const result = await deleteEventAction({ id: event.id });
+    if (!result.ok) {
+      toast.error("An error occurred deleting the event", {
+        description: result.error.join(", "),
+      });
+    } else {
+      toast.success("Event has been deleted");
     }
   };
 
@@ -69,9 +60,9 @@ export function EventCard({ event }: EventCardProps) {
           <div>
             <CardTitle>{event.name}</CardTitle>
             <CardDescription>{date}</CardDescription>
-            {event.sport_type_text && (
-              <Badge className="mt-2">{event.sport_type_text}</Badge>
-            )}
+            <Badge className="mt-2">
+              {sportTypes.find((s) => s.id === event.sport_type_id)?.name}
+            </Badge>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent">
@@ -79,7 +70,7 @@ export function EventCard({ event }: EventCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={handleUpdate}
+                onClick={() => setDrawerOpen(true)}
                 className="cursor-pointer"
               >
                 <Pencil className="mr-2 h-4 w-4" />
@@ -94,6 +85,11 @@ export function EventCard({ event }: EventCardProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <UpdateEventDrawer
+            event={event}
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+          />
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0 space-y-2">

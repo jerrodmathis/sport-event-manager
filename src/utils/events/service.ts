@@ -10,16 +10,12 @@ type SB = SupabaseClient<DB>;
 
 export type ListEventsParams = {
   search?: string;
-  sportTypeId?: number;
+  sportTypeId?: string;
   limit?: number;
   offset?: number;
 };
 
-export type Event = Pick<
-  DB["public"]["Tables"]["events"]["Row"],
-  "id" | "name" | "description" | "sport_type_id" | "sport_type_text"
-> &
-  Pick<DB["public"]["Tables"]["event_venues"]["Row"], "name">;
+export type Event = Awaited<ReturnType<typeof listEvents>>[number];
 
 export async function listEvents(
   supabase: SB,
@@ -34,7 +30,6 @@ export async function listEvents(
         name, 
         starts_at, 
         sport_type_id, 
-        sport_type_text, 
         description, 
         event_venues ( 
           id, 
@@ -85,7 +80,6 @@ export async function createEvent(
       starts_at: data.startsAt,
       description: data.description ?? null,
       sport_type_id: data.sportTypeId ?? null,
-      sport_type_text: data.sportTypeText,
     })
     .select("id")
     .single();
@@ -123,7 +117,6 @@ export async function updateEvent(
       starts_at: data.startsAt,
       description: data.description ?? null,
       sport_type_id: data.sportTypeId ?? null,
-      sport_type_text: data.sportTypeText,
     })
     .eq("id", data.id)
     .eq("created_by", userId);
