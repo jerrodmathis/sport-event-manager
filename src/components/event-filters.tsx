@@ -30,18 +30,18 @@ export function EventFilters({ sportTypes }: { sportTypes: SportType[] }) {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col lg:flex-row gap-2 min-w-0 flex-1">
       <Input
         placeholder="Search events..."
         defaultValue={searchParams.get("search") ?? ""}
         onChange={(e) => updateSearchParams("search", e.target.value)}
-        className="max-w-sm"
+        className="w-full lg:min-w-0 lg:flex-1 lg:max-w-[240px]"
       />
       <Select
         value={searchParams.get("sportType") ?? ""}
         onValueChange={(value) => updateSearchParams("sportType", value)}
       >
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-full lg:w-auto lg:min-w-[120px]">
           <SelectValue placeholder="All sports" />
         </SelectTrigger>
         <SelectContent>

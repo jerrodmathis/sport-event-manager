@@ -15,7 +15,7 @@ export async function EventList({
   return (
     <>
       <SiteHeader sportTypes={sportTypes} />
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-4 p-4 overflow-auto">
         <Suspense fallback={<EventListSkeleton />}>
           <EventListContent
             sportTypes={sportTypes}
