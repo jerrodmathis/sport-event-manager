@@ -17,6 +17,10 @@ export type ListEventsParams = {
 
 export type Event = Awaited<ReturnType<typeof listEvents>>[number];
 
+function escapeLikePattern(str: string): string {
+  return str.replace(/[%_]/g, "\\$&");
+}
+
 export async function listEvents(
   supabase: SB,
   userId: string,
@@ -26,16 +30,16 @@ export async function listEvents(
     .from("events")
     .select(
       `
-        id, 
-        name, 
-        starts_at, 
-        sport_type_id, 
-        description, 
-        event_venues ( 
-          id, 
-          name, 
-          address_text, 
-          details 
+        id,
+        name,
+        starts_at,
+        sport_type_id,
+        description,
+        event_venues (
+          id,
+          name,
+          address_text,
+          details
         )
   `,
     )
@@ -44,7 +48,7 @@ export async function listEvents(
 
   const search = params.search?.trim();
   if (search) {
-    query = query.ilike("name", `%${search}%`);
+    query = query.ilike("name", `%${escapeLikePattern(search)}%`);
   }
 
   if (params.sportTypeId) {
