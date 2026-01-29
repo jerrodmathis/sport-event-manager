@@ -2,8 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getUser, getSession, getUserWithSession } from "./service";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string[] };
 
@@ -59,11 +57,4 @@ export async function getUserWithSessionAction(): Promise<
           : ["An unknown error occurred while fetching user and session."],
     };
   }
-}
-
-export async function signOutAction() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  revalidatePath("/", "layout");
-  redirect("/sign-in");
 }

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { BadgeCheck, EllipsisVertical, LogOut } from "lucide-react";
 import Link from "next/link";
-import { signOutAction } from "@/utils/users/actions";
+import { signOutAction } from "@/utils/auth/actions";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);

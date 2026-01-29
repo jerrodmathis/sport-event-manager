@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,13 +21,8 @@ import {
   FieldDescription,
   FieldError,
 } from "@/components/ui/field";
-
-const formSchema = z.object({
-  email: z.email({ error: "Enter a valid email address" }),
-  password: z.string().min(1, { error: "Password is required" }),
-});
-
-type FormSchema = z.infer<typeof formSchema>;
+import { loginAction } from "@/utils/auth/actions";
+import { loginSchema, LoginInput } from "@/utils/auth/schemas";
 
 export function LoginForm({
   className,
@@ -38,28 +30,21 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
-  const form = useForm<FormSchema>({
+  const form = useForm<LoginInput>({
     defaultValues: { email: "", password: "" },
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     shouldUnregister: true,
   });
 
-  const handleLogin = async (data: FormSchema) => {
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
+  const handleLogin = async (data: LoginInput) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-      if (error) throw error;
-      router.push("/");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setIsLoading(true);
+      setError(null);
+      const result = await loginAction(data);
+      if (!result.ok) {
+        setError(result.error.join(", "));
+      }
     } finally {
       setIsLoading(false);
     }

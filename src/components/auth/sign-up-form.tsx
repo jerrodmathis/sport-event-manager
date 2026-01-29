@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,24 +21,8 @@ import {
   FieldError,
   FieldDescription,
 } from "@/components/ui/field";
-
-const formSchema = z
-  .object({
-    name: z.string({ error: "Please enter your name" }),
-    email: z.email({ error: "Please enter a valid email address" }),
-    password: z
-      .string()
-      .min(8, { error: "Password must be at least 8 characters" }),
-    confirmPassword: z
-      .string()
-      .min(1, { error: "Please confirm your password" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    error: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type FormSchema = z.infer<typeof formSchema>;
+import { signUpAction } from "@/utils/auth/actions";
+import { signUpSchema, SignUpInput } from "@/utils/auth/schemas";
 
 export function SignUpForm({
   className,
@@ -49,43 +30,26 @@ export function SignUpForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
-  const form = useForm<FormSchema>({
+  const form = useForm<SignUpInput>({
     defaultValues: {
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(signUpSchema),
     shouldUnregister: true,
   });
 
-  const handleSignUp = async (data: FormSchema) => {
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
+  const handleSignUp = async (data: SignUpInput) => {
     try {
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            display_name: data.name,
-          },
-          emailRedirectTo: `${window.location.origin}/`,
-        },
-      });
-      if (error) throw error;
-      if (authData.session) {
-        router.push("/");
-      } else {
-        router.push("/auth/sign-up-success");
+      setIsLoading(true);
+      setError(null);
+      const result = await signUpAction(data);
+      if (!result.ok) {
+        setError(result.error.join(", "));
       }
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
