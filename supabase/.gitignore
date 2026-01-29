@@ -6,3 +6,6 @@
 .env.keys
 .env.local
 .env.*.local
+
+# untitle snippets
+snippets/Untitled*.sql
