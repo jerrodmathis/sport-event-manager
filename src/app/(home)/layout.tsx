@@ -21,7 +21,9 @@ export default function HomeLayout({
         <SidebarWithUser />
       </Suspense>
       <SidebarInset>
-        {children}
+        <Suspense>
+          {children}
+        </Suspense>
         <Toaster />
       </SidebarInset>
     </SidebarProvider>
